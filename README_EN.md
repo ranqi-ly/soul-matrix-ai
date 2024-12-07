@@ -53,7 +53,7 @@ yarn install
 
 3. Configure environment variables
 ```bash
-cp .env.example .env
+cp env.example .env
 ```
 
 Edit the `.env` file with your settings:
@@ -345,6 +345,32 @@ A: The YunWu AI API key is required to access the GPT models, which is the core 
 
 ### Q: What languages are supported?
 A: Currently, the system supports both Chinese and English input. More language support will be added in the future.
+
+## 📸 screenhot
+
+### home
+
+![首页界面](/Users/taielab/Desktop/AI开发项目/soul-matrix-ai/public/screenshots/home.png)
+
+- Simple and modern design style
+- Responsive layout, various vehicle equipment
+- Clear operation guidance
+
+### Input-form
+
+![信息输入](/Users/taielab/Desktop/AI开发项目/soul-matrix-ai/public/screenshots/input-form.png)
+
+- Intuitive form design
+- Real-time input validation
+- Friendly error messages
+
+### result
+
+![分析结果](./public/screenshots/result.png)
+
+- Clear match score
+- Detailed analysis reports
+- List of actionable suggestions
 
 ## 📝 Changelog
 

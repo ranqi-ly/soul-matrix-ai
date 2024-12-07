@@ -1,4 +1,4 @@
-# AI Love Predictor 💕
+# Soul Matrix Ai  💕
 
 [![Next.js](https://img.shields.io/badge/Next.js-13.4.7-blueviolet.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.1.3-blue.svg)](https://www.typescriptlang.org/)
@@ -53,7 +53,7 @@ yarn install
 
 3. 配置环境变量
 ```bash
-cp .env.example .env
+cp env.example .env
 ```
 
 编辑 `.env` 文件，设置以下环境变量：
