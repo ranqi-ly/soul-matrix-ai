@@ -38,9 +38,9 @@ export async function POST(request: Request) {
     const cachedResult = cache.get(cacheKey);
     if (cachedResult) {
       return NextResponse.json({
-        success: true,
-        data: cachedResult,
-        cached: true
+        成功: true,
+        数据: cachedResult,
+        缓存: true
       });
     }
 
@@ -59,187 +59,120 @@ export async function POST(request: Request) {
             messages: [
               {
                 role: 'system',
-                content: '你是一个专业的情感分析师，擅长分析两个人的匹配程度。请根据提供的信息进行分析并给出详细的建议。'
+                content: `你是一位专业的关系咨询师和心理分析专家，擅长运用心理学理论和实践经验分析两个人的匹配程度。
+                
+                分析框架：
+                1. 使用多维度评估方法，包括：
+                   - 性格匹配度：基于大五人格特质理论（开放性、尽责性、外向性、宜人性、情绪稳定性）
+                   - 沟通方式：基于依恋理论和沟通模式研究
+                   - 价值观：核心信念和生活目标的一致性
+                   - 生活方式：日常习惯和偏好的兼容性
+                   - 成长潜力：共同发展和适应能力
+                
+                2. 时间维度分析：
+                   - 短期（0-1年）：初始适应和磨合期
+                   - 中期（1-3年）：关系稳定和发展期
+                   - 长期（3年以上）：共同成长和深化期
+                
+                3. 建议提供：
+                   - 优先级：高/中/低
+                   - 难易程度：容易/适中/具有挑战
+                   - 时间线：即时/短期/长期
+                   - 具体可执行的行动步骤
+                
+                请提供结构化的JSON格式响应，包含以下字段：
+                {
+                  "匹配度": number, // 总体匹配度(0-100)
+                  "维度": {
+                    "性格匹配度": number,
+                    "沟通方式": number,
+                    "价值观": number,
+                    "生活方式": number,
+                    "成长潜力": number
+                  },
+                  "分析": {
+                    "短期": {"优势": [], "挑战": [], "预测": []},
+                    "中期": {"优势": [], "挑战": [], "预测": []},
+                    "长期": {"优势": [], "挑战": [], "预测": []}
+                  },
+                  "兼容性": string,
+                  "建议": [{
+                    "内容": string,
+                    "优先级": "高"|"中"|"低",
+                    "难易程度": "容易"|"适中"|"具有挑战",
+                    "时间线": "即时"|"短期"|"长期",
+                    "行动步骤": []
+                  }]
+                }`
               },
               {
                 role: 'user',
                 content: `请分析以下两个人的匹配程度：
                 第一个人：
-                姓名：${person1.name}
-                性别：${person1.gender}
-                年龄：${person1.age}
-                兴趣爱好：${person1.interests}
-                价值观：${person1.values}
-                生活方式：${person1.lifestyle}
+                姓名：${person1.姓名}
+                性别：${person1.性别}
+                年龄：${person1.年龄}
+                兴趣：${person1.兴趣}
+                价值观：${person1.价值观}
+                生活方式：${person1.生活方式}
 
                 第二个人：
-                姓名：${person2.name}
-                性别：${person2.gender}
-                年龄：${person2.age}
-                兴趣爱好：${person2.interests}
-                价值观：${person2.values}
-                生活方式：${person2.lifestyle}
+                姓名：${person2.姓名}
+                性别：${person2.性别}
+                年龄：${person2.年龄}
+                兴趣：${person2.兴趣}
+                价值观：${person2.价值观}
+                生活方式：${person2.生活方式}
 
-                请提供：
-                1. 总体匹配度评分（0-100分）
-                2. 优势互补点分析
-                3. 潜在问题点分析
-                4. 具体建议和改进方向`
+                请按照系统提示的格式提供JSON响应。`
               }
             ],
-            temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
-            max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS || '2000'),
+            temperature: 0.7,
+            max_tokens: 2000,
+            response_format: { type: "json_object" }
           })
         });
 
         if (!response.ok) {
           const error = await response.json();
-          throw new Error(error.error?.message || '请求失败');
+          throw new Error(error.error?.消息 || '请求失败');
         }
 
         const data = await response.json();
-        const content = data.choices[0].message.content;
-        console.log('AI Response:', content);
-
-        // 解析 AI 响应内容
-        const lines = content.split('\n');
-        let result = {
-          score: 0,
-          analysis: '',
-          compatibility: '',
-          recommendations: []
-        };
-
-        let currentSection = '';
-        let sectionContent = '';
-
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine) continue;
-
-          // 匹配分数（支持多种格式）
-          const scorePatterns = [
-            /匹配[度率分数][:：]?\s*(\d+)/,
-            /匹配[度率分数][为是]\s*(\d+)/,
-            /[总整]体匹配[度率分数][:：]?\s*(\d+)/,
-            /(\d+)\s*[分点]/
-          ];
-
-          for (const pattern of scorePatterns) {
-            const match = trimmedLine.match(pattern);
-            if (match) {
-              const score = parseInt(match[1]);
-              if (score >= 0 && score <= 100) {
-                result.score = score;
-              }
-              break;
-            }
-          }
-
-          // 识别段落标题
-          if (trimmedLine.includes('分析：') || trimmedLine.includes('分析:') || 
-              trimmedLine.includes('优势') || trimmedLine.includes('共同点')) {
-            currentSection = 'analysis';
-            sectionContent = trimmedLine.split(/[：:]/)[1]?.trim() || '';
-            continue;
-          }
-          
-          if (trimmedLine.includes('问题') || trimmedLine.includes('挑战') || 
-              trimmedLine.includes('不足') || trimmedLine.includes('差异')) {
-            currentSection = 'compatibility';
-            sectionContent = trimmedLine.split(/[：:]/)[1]?.trim() || '';
-            continue;
-          }
-          
-          if (trimmedLine.includes('建议') || trimmedLine.includes('改进') || 
-              trimmedLine.includes('提议') || trimmedLine.includes('改善')) {
-            currentSection = 'recommendations';
-            continue;
-          }
-
-          // 处理列表项
-          if (trimmedLine.match(/^[1-9一二三四五六七八九十]\.|^[1-9一二三四五六七八九十]、|^[-•*]|^\d+\)/) ||
-              trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
-            const cleanedLine = trimmedLine.replace(/^[1-9一二三四五六七八九十]\.|^[1-9一二三四五六七八九十]、|^[-•*]|\d+\)/, '').trim();
-            
-            if (currentSection === 'recommendations' && cleanedLine) {
-              if (!result.recommendations.includes(cleanedLine)) {
-                result.recommendations.push(cleanedLine);
-              }
-            } else if (currentSection === 'analysis' && cleanedLine) {
-              result.analysis = result.analysis ? `${result.analysis}\n${cleanedLine}` : cleanedLine;
-            } else if (currentSection === 'compatibility' && cleanedLine) {
-              result.compatibility = result.compatibility ? `${result.compatibility}\n${cleanedLine}` : cleanedLine;
-            }
-            continue;
-          }
-
-          // 累积段落内容
-          if (currentSection && trimmedLine) {
-            switch (currentSection) {
-              case 'analysis':
-                if (!trimmedLine.includes('建议') && !trimmedLine.includes('问题')) {
-                  result.analysis = result.analysis ? `${result.analysis} ${trimmedLine}` : trimmedLine;
-                }
-                break;
-              case 'compatibility':
-                if (!trimmedLine.includes('建议')) {
-                  result.compatibility = result.compatibility ? `${result.compatibility} ${trimmedLine}` : trimmedLine;
-                }
-                break;
-              case 'recommendations':
-                if (!trimmedLine.match(/^[1-9一二三四五六七八九十]\.|^[1-9一二三四五六七八九十]、|^[-•*]|\d+\)/)) {
-                  const lastIndex = result.recommendations.length - 1;
-                  if (lastIndex >= 0) {
-                    result.recommendations[lastIndex] += ` ${trimmedLine}`;
-                  }
-                }
-                break;
-            }
-          }
+        const result = JSON.parse(data.choices[0].message.content);
+        
+        // 验证响应格式
+        if (!result.匹配度 || !result.维度 || !result.分析 || !result.建议) {
+          throw new Error('AI响应格式不正确');
         }
 
-        // 设置默认值和验证
-        if (!result.score || result.score < 0 || result.score > 100) {
-          result.score = 75; // 设置一个默认的匹配度
-        }
+        // 规范化分数确保在0-100范围内
+        result.匹配度 = Math.max(0, Math.min(100, result.匹配度));
+        Object.keys(result.维度).forEach(key => {
+          result.维度[key] = Math.max(0, Math.min(100, result.维度[key]));
+        });
 
-        if (!result.analysis) {
-          result.analysis = '根据双方的个人信息分析，两人在某些方面存在共同点和互补性。双方的性格特征和生活态度有一定的契合度，这为建立良好的关系奠定了基础。';
-        }
+        // 缓存结果
+        cache.put(cacheKey, result, CACHE_DURATION);
 
-        if (!result.compatibility) {
-          result.compatibility = '可能存在的挑战包括生活习惯的差异和沟通方式的不同。这些差异需要双方共同努力，相互理解和适应，才能建立更稳固的关系。';
-        }
-
-        if (result.recommendations.length === 0) {
-          result.recommendations = [
-            '建议双方多进行开放和诚实的沟通，表达各自的想法和感受',
-            '相互尊重对方的个人空间和生活习惯，在差异中寻找平衡',
-            '共同参与有趣的活动，增进彼此了解和感情',
-            '保持积极的心态，用包容和理解的态度面对分歧'
-          ];
-        }
-
-        console.log('Parsed Result:', result);
-        return result;
+        return NextResponse.json({
+          成功: true,
+          数据: result
+        });
       }, MAX_RETRIES);
     });
 
-    // 缓存结果
-    cache.put(cacheKey, result, CACHE_DURATION);
-
     return NextResponse.json({
-      success: true,
-      data: result,
-      cached: false
+      成功: true,
+      数据: result,
+      缓存: false
     });
   } catch (error: any) {
     console.error('Prediction error:', error);
     return NextResponse.json({
-      success: false,
-      error: {
-        message: error.message || '预测失败，请稍后重试'
+      成功: false,
+      错误: {
+        消息: error.message || '预测失败，请稍后重试'
       }
     }, { status: 500 });
   }

@@ -3,40 +3,105 @@
 [![Next.js](https://img.shields.io/badge/Next.js-13.4.7-blueviolet.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.1.3-blue.svg)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.3.2-38B2AC.svg)](https://tailwindcss.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-green.svg)](https://openai.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Soul Matrix AI is an innovative AI-powered relationship compatibility analysis system. Using advanced OpenAI GPT models, it analyzes personality traits, interests, values, and lifestyles of two individuals to provide professional matching assessments and personalized relationship advice. The system not only calculates compatibility scores but also provides detailed analysis reports and constructive dating suggestions.
+<div align="center">
+  <h3>🌟 AI-Powered Relationship Analysis System</h3>
+  <p>Deep Personality Analysis • Intelligent Matching • Professional Relationship Advice</p>
+</div>
 
-[中文文档](README.md)
+## 📖 Introduction
 
-## ✨ Features
+Soul Matrix AI is an innovative AI-driven relationship analysis system. Leveraging advanced OpenAI GPT-4/3.5 models, it provides professional compatibility assessments and personalized relationship advice by analyzing personality traits, interests, values, and lifestyles of two individuals. The system not only calculates compatibility scores but also generates detailed analysis reports and constructive relationship guidance.
 
-- 🤖 Intelligent analysis powered by OpenAI GPT models
-- 💑 Comprehensive personal information collection and analysis
-- 📊 Intuitive compatibility score visualization
-- 🎯 Detailed complementary strengths analysis
-- ⚠️ Potential challenges warning
-- 💡 Personalized relationship advice
-- 🌐 API proxy support for regions with restricted access
-- 🔄 Smart request queue and caching system
+## 🌈 Interface Preview
 
-## 🌟 Live Demo
+### 💫 Main Interface
+![Main Interface](/public/screenshots/main.png)
+> Clean, modern user interface with dark mode support
 
-[Try it online](https://github.com/taielab) (Coming Soon)
+### 📝 Assessment Form
+![Assessment Form](/public/screenshots/form.png)
+> Intelligent form design for effortless information input
 
-Note: This project uses [YunWu AI](https://yunwu.ai/register?aff=PBpy) as the OpenAI API proxy service for regions with restricted access.
+### 📊 Analysis Report
+![Analysis Report](/public/screenshots/report.png)
+> Professional compatibility analysis with data visualization
+
+### 🔄 Share Feature
+![Share Feature](/public/screenshots/share.png)
+> Convenient social media sharing functionality
+
+## 🎯 Core Features
+
+### 🤖 AI Analysis System
+- GPT-4/3.5 powered deep analysis engine
+- Smart request queue and auto-retry mechanism
+- Multi-layer caching system
+- Robust error handling and recovery
+- Multi-dimensional personality trait analysis
+
+### 💑 User Experience
+- Intuitive questionnaire interface
+- Real-time compatibility calculation
+- Beautiful data visualization
+- Responsive design support
+- Social media sharing integration
+- Smooth loading states and transitions
+
+### 📊 Analysis Report
+- Comprehensive Dimensional Analysis
+  - Personality compatibility assessment
+  - Communication style analysis
+  - Value system alignment
+  - Lifestyle compatibility
+  - Growth potential evaluation
+  - MBTI personality type analysis
+  - Zodiac compatibility analysis
+  - Common interests exploration
+- Professional Development Advice
+  - Personalized interaction strategies
+  - Potential risk warnings
+  - Relationship enhancement plans
+  - Mutual growth suggestions
+- Visual Chart Display
+  - Radar charts for compatibility
+  - Bar charts for compatibility metrics
+  - Pie charts for dimension weights
+
+## 🛠️ Tech Stack
+
+### Frontend
+- ⚡️ Next.js 13+ (App Router)
+- 🔷 TypeScript
+- 🎨 Tailwind CSS
+- 🎯 React Query
+- 📊 Recharts
+- 🎭 Framer Motion
+- 🎪 shadcn/ui
+
+### Backend
+- 🚀 Next.js API Routes
+- 🤖 OpenAI GPT-4/3.5
+- 💾 Edge Runtime
+- 🔄 Vercel KV Storage
+
+### Development Tools
+- 📦 pnpm
+- 🔍 ESLint
+- 💅 Prettier
+- 🐶 Husky
+- 📋 Commitlint
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js 16.8+
+- pnpm 8.0+
+- OpenAI API Key
 
-- Node.js 16.8 or higher
-- npm or yarn package manager
-- OpenAI API key
-- Modern browser (with ES6+ support)
-- Stable internet connection (for API calls)
-
-### Installation
+### Installation Steps
 
 1. Clone the repository
 ```bash
@@ -46,367 +111,142 @@ cd soul-matrix-ai
 
 2. Install dependencies
 ```bash
-npm install
-# or
-yarn install
+pnpm install
 ```
 
-3. Configure environment variables
+3. Environment setup
 ```bash
-cp env.example .env
+cp .env.example .env
 ```
 
-Edit the `.env` file with your settings:
+4. Configure environment variables
 ```env
-OPENAI_API_BASE_URL=https://yunwu.ai/v1
-OPENAI_API_KEY=your_api_key
-OPENAI_API_MODEL=gpt-3.5-turbo
+# OpenAI API Configuration (Using YunWu Proxy)
+YUNWU_API_KEY=
+YUNWU_API_URL=https://yunwu.ai/v1/chat/completions
+YUNWU_MODEL=gpt-3.5-turbo
 OPENAI_MAX_TOKENS=2000
 OPENAI_TEMPERATURE=0.7
 
+# Proxy Retry Configuration
 API_MAX_RETRIES=3
-API_INITIAL_RETRY_DELAY=1000
-API_MAX_RETRY_DELAY=8000
+API_INITIAL_RETRY_DELAY=3000
+API_MAX_RETRY_DELAY=15000
+
+# Proxy Timeout Configuration
 API_REQUEST_TIMEOUT=30000
 
-CACHE_DURATION=3600000
+# Other Configuration
+NODE_ENV=development
 ```
 
-4. Start the development server
+5. Start development server
 ```bash
-npm run dev
-# or
-yarn dev
+pnpm dev
 ```
 
-Visit http://localhost:3000 to view the application.
+## 🚀 Deployment Guide
 
-## 📁 Project Structure
+### Deploy to Vercel
 
-```
-soul-matrix-ai/
-├── app/                    # Next.js 13 app directory
-│   ├── api/               # API routes
-│   │   └── predict/      # Prediction API
-│   ├── layout.tsx        # App layout
-│   └── page.tsx          # Main page
-├── components/            # React components
-│   ├── PredictionForm/   # Prediction form component
-│   ├── ResultCard/       # Result display component
-│   └── common/           # Common components
-├── types/                # TypeScript type definitions
-│   ├── api.ts           # API related types
-│   └── common.ts        # Common types
-├── utils/               # Utility functions
-│   ├── apiQueue.ts     # API request queue
-│   ├── cache.ts        # Cache utilities
-│   └── validation.ts   # Validation utilities
-├── styles/             # Style files
-└── public/            # Static assets
-```
+1. **Fork and Import**
+   - Fork this repository
+   - Go to [Vercel](https://vercel.com)
+   - Click "New Project"
+   - Import your forked repository
+   - Choose "Next.js" as framework
 
-## 📚 Usage Examples
-
-### Basic Usage Flow
-
-1. Visit the website homepage
-2. Fill in information for two people
-3. Click the "Start Analysis" button
-4. Wait for analysis results
-5. View detailed matching report
-
-### Example Scenario
-
-```json
-// Input example
-{
-  "person1": {
-    "name": "John",
-    "age": 25,
-    "hobbies": "reading, travel, photography",
-    "values": "family-oriented, career-driven"
-  },
-  "person2": {
-    "name": "Jane",
-    "age": 24,
-    "hobbies": "music, cooking, photography",
-    "values": "relationship-focused, self-improvement"
-  }
-}
-
-// Output example
-{
-  "matchScore": 85,
-  "analysis": "Both individuals share a strong interest in arts and creativity...",
-  "recommendations": [
-    "Consider joining photography activities together",
-    "Share and explore each other's interests"
-  ]
-}
-```
-
-## 📡 API Documentation
-
-### Prediction Endpoint
-
-**Endpoint**: `/api/predict`
-
-**Method**: POST
-
-**Request Parameters**:
-```typescript
-interface PredictRequest {
-  person1: {
-    name: string;
-    age: number;
-    hobbies: string;
-    values: string;
-  };
-  person2: {
-    name: string;
-    age: number;
-    hobbies: string;
-    values: string;
-  };
-}
-```
-
-**Response Format**:
-```typescript
-interface PredictResponse {
-  matchScore: number;        // Compatibility score (0-100)
-  analysis: string;          // Detailed analysis
-  compatibility: string[];   // Compatibility points
-  recommendations: string[]; // Suggestions
-}
-```
-
-**Error Codes**:
-- 400: Bad Request
-- 429: Too Many Requests
-- 500: Internal Server Error
-
-**Example Call**:
-```javascript
-const response = await fetch('/api/predict', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    person1: {
-      name: 'John',
-      age: 25,
-      hobbies: 'reading, travel',
-      values: 'family-oriented'
-    },
-    person2: {
-      name: 'Jane',
-      age: 24,
-      hobbies: 'music, cooking',
-      values: 'career-driven'
-    }
-  })
-});
-
-const result = await response.json();
-```
-
-## 🏗️ Technical Architecture
-
-- **Frontend Framework**: Next.js 13 (App Router) - Utilizing latest App Router features
-- **Programming Language**: TypeScript - Complete type support
-- **Styling Solution**: TailwindCSS - Responsive design
-- **State Management**: React Hooks - Including custom hooks
-- **Form Handling**: React Hook Form - High-performance form validation
-- **API Integration**: OpenAI GPT API - Core matching algorithm
-- **Caching System**: Memory Cache - Response optimization
-- **Proxy Service**: YunWu AI API Proxy - Access solution for restricted regions
-- **Deployment Platform**: Vercel - Zero-config deployment
-
-## 🚀 Deployment
-
-### Deploy on Vercel
-
-1. **Prerequisites**
-   - Vercel account
-   - GitHub account
-   - Environment variables ready
-
-2. **Import Project**
-   - Click "Import Project" in Vercel console
-   - Choose your GitHub repository
-   - Select `soul-matrix-ai` project
-
-3. **Configure Environment Variables**
-   Add the following environment variables in Vercel project settings:
-   ```
-   OPENAI_API_BASE_URL=https://yunwu.ai/v1
-   OPENAI_API_KEY=your_api_key
-   OPENAI_API_MODEL=gpt-3.5-turbo
+2. **Environment Variables**
+   - Add the following environment variables in Vercel project settings:
+   ```env
+   # YUNWU API Configuration (Using YunWu Proxy)
+   YUNWU_API_KEY=your_yunwu_api_key
+   YUNWU_API_URL=https://yunwu.ai/v1/chat/completions
+   YUNWU_MODEL=gpt-3.5-turbo
    OPENAI_MAX_TOKENS=2000
    OPENAI_TEMPERATURE=0.7
+
+   # Proxy Configuration
    API_MAX_RETRIES=3
-   API_INITIAL_RETRY_DELAY=1000
-   API_MAX_RETRY_DELAY=8000
+   API_INITIAL_RETRY_DELAY=3000
+   API_MAX_RETRY_DELAY=15000
    API_REQUEST_TIMEOUT=30000
-   CACHE_DURATION=3600000
+
+   # Environment
+   NODE_ENV=production
    ```
 
-4. **Deploy**
+3. **Deploy**
    - Click "Deploy"
-   - Wait for the build process to complete
+   - Wait for the build process
    - Your site will be live at `https://your-project.vercel.app`
 
-5. **Custom Domain (Optional)**
+4. **Custom Domain (Optional)**
    - Go to Project Settings > Domains
    - Add your custom domain
-   - Follow the DNS configuration instructions
+   - Follow DNS configuration instructions
 
-## 🔧 Core Features
+### Deploy to Other Platforms
 
-### 1. Personal Information Collection
-- Basic info (name, gender, age)
-- Interests and hobbies
-- Personal values
-- Lifestyle preferences
+#### Railway
+1. Create new project from GitHub
+2. Configure environment variables
+3. Deploy with "Start Command": `pnpm start`
 
-### 2. AI Analysis System
-- Smart compatibility scoring
-- Multi-dimensional relationship analysis
-- Personalized advice generation
+#### Netlify
+1. Connect your GitHub repository
+2. Configure build settings:
+   - Build command: `pnpm build`
+   - Publish directory: `.next`
+3. Add environment variables
+4. Deploy
 
-### 3. Request Optimization
-- Intelligent retry mechanism
-- Request queue management
-- Response caching system
-
-## 📈 Performance Optimizations
-
-- **Client-side Component Lazy Loading**: Using Next.js dynamic import
-- **Step-by-step Form Loading**: Enhanced user experience
-- **API Response Caching**: Smart caching mechanism
-- **Request Queue Control**: Token bucket algorithm
-- **Exponential Backoff Retry**: Smart API failure handling
-- **Image Resource Optimization**: Next.js Image component
-- **Code Splitting**: Automatic bundle optimization
-
-## 🔐 Security
-
-- **Environment Variables**: Strict sensitive config management
-- **API Key Protection**: Server-side API calls
-- **Rate Limiting**: Request throttling
-- **Input Validation**: Client and server-side validation
-- **CORS Policy**: Strict cross-origin resource sharing
-- **Secure Dependencies**: Regular security updates
-
-## 👨‍💻 Development Guide
-
-### Local Development Setup
-
-1. **Install Dependencies**
-```bash
-npm install
-# or
-yarn install
 ```
 
-2. **Start Development Server**
-```bash
-npm run dev
-# or
-yarn dev
-```
+## 📱 Usage Guide
 
-3. **Run Tests**
-```bash
-npm run test
-# or
-yarn test
-```
+1. Personal Information
+   - Enter basic information
+   - Select personality traits
+   - Describe interests
 
-### Debugging Tips
+2. Partner Information
+   - Input partner details
+   - Describe personality traits
+   - Add interests and hobbies
 
-- Use Chrome DevTools for frontend debugging
-- Use `console.log` or `debug` for backend debugging
-- Monitor API requests in Network panel
+3. Get Analysis Report
+   - View compatibility score
+   - Read detailed analysis
+   - Review suggestions
 
-### Test Data
-
-Test data available in `__tests__/mockData` directory:
-- `sampleUsers.ts`: Sample user data
-- `sampleResults.ts`: Sample analysis results
-
-## ❓ FAQ
-
-### Q: Why do I need a YunWu AI API key?
-
-A: The YunWu AI API key is required to access the GPT models, which is the core of our intelligent matching analysis. You can obtain your key from the YunWu AI website.
-
-### Q: What languages are supported?
-A: Currently, the system supports both Chinese and English input. More language support will be added in the future.
-
-## 📸 screenhot
-
-### home
-
-![首页界面](/Users/taielab/Desktop/AI开发项目/soul-matrix-ai/public/screenshots/home.png)
-
-- Simple and modern design style
-- Responsive layout, various vehicle equipment
-- Clear operation guidance
-
-### Input-form
-
-![信息输入](/Users/taielab/Desktop/AI开发项目/soul-matrix-ai/public/screenshots/input-form.png)
-
-- Intuitive form design
-- Real-time input validation
-- Friendly error messages
-
-### result
-
-![分析结果](./public/screenshots/result.png)
-
-- Clear match score
-- Detailed analysis reports
-- List of actionable suggestions
-
-## 📝 Changelog
-
-### [1.0.0] - 2024-12-7
-- 🎉 Initial Release
-- ✨ Implemented basic matching functionality
-- 🔧 Added domestic API proxy support
-- 📚 Added comprehensive documentation
-
-### [0.9.0] - 2024-12-5
-- 🚧 Beta version release
-- 🔨 Core functionality improvements
-- 🎨 Enhanced UI/UX
+4. Share Results
+   - Save analysis report
+   - Share on social media
+   - Export detailed report
 
 ## 🤝 Contributing
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Standards
-
-- Follow TypeScript type definition standards
-- Use ESLint and Prettier for code formatting
-- Write unit tests
-- Keep code concise with necessary comments
-- Follow semantic commit message conventions
+We welcome all forms of contributions, whether it's new features, documentation improvements, or bug reports. Please check our contribution guidelines for more information.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📧 Contact
+## 🙏 Acknowledgments
 
-Project Maintainer - [@taielab](https://github.com/taielab)
+- OpenAI team for powerful API support
+- Next.js team for excellent framework
+- shadcn/ui for beautiful components
+- All contributors for valuable input
 
-Project Link: [https://github.com/taielab/soul-matrix-ai](https://github.com/taielab/soul-matrix-ai)
+## 📞 Contact
+
+- Project Lead: [Taielab](https://github.com/taielab)
+- Website: [https://github.com/taielab](https://github.com/taielab)
+
+---
+
+<div align="center">
+  <p>Connecting Souls with Technology • Guiding Love with Intelligence</p>
+</div>
