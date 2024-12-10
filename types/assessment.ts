@@ -9,7 +9,7 @@ export interface Option {
 export interface Question {
   id: string;
   text: string;
-  category: 'attachment' | 'conflict' | 'values' | 'financial' | 'growth';
+  category: 'attachment' | 'conflict' | 'values' | 'financial' | 'growth' | 'expression' | 'parenting' | 'goals';
   options: Option[];
 }
 

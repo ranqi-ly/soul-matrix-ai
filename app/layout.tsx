@@ -1,15 +1,15 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 
-const inter = Inter({
+const inter = Inter({ 
   subsets: ['latin'],
-  variable: '--font-inter',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'AI 恋爱预测 | 找到你的真爱',
-  description: '使用先进的 AI 技术，预测你的恋爱和婚姻契合度，帮助你找到真爱。',
+  title: 'Soul Matrix AI - 探索你们的灵魂契合度',
+  description: '利用先进的 AI 技术，深入分析你们的关系潜力，获取专业的关系洞察和建议',
 }
 
 export default function RootLayout({
@@ -18,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="zh" className={inter.variable}>
-      <body className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+    <html lang="zh-CN">
+      <body className={inter.className}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <header className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">AI 恋爱预测</h1>
@@ -32,6 +32,5 @@ export default function RootLayout({
         </div>
       </body>
     </html>
-    
   )
 }

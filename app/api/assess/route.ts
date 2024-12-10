@@ -247,82 +247,12 @@ function validateAnalysisResult(data: any) {
   } catch (error) {
     console.error('Error during analysis result validation:', error);
     console.error('Problematic data:', JSON.stringify(data, null, 2));
-    throw new Error(`Invalid analysis result structure: ${error.message}`);
-  }
-}
-
-// 验证URL是否可访问
-async function validateUrl(url: string): Promise<boolean> {
-  try {
-    const response = await axios.get(url, {
-      timeout: 5000,
-      maxRedirects: 5,
-      validateStatus: function (status) {
-        return status === 200; // 只接受200状态码
-      }
-    });
-    return true;
-  } catch (error) {
-    console.error(`URL validation failed for ${url}:`, error.message);
-    return false;
-  }
-}
-
-// 获取默认的参考案例
-function getDefaultReferences() {
-  return [
-    "恋爱中的有效沟通：如何化解冲突",
-    "如何维系长期恋爱关系",
-    "在亲密关系中成长",
-    "建立健康的亲密关系边界",
-    "提升两性关系质量的实用技巧",
-    "情侣间的情绪管理艺术",
-    "共同成长：打造高质量恋爱关系",
-    "恋爱中的自我认知与成长",
-    "维护长期关系的核心要素",
-    "如何在恋爱中保持独立性"
-  ];
-}
-
-// 验证并修复参考案例
-function validateAndFixReferences(content: any) {
-  const defaultRefs = getDefaultReferences();
-  
-  // 递归遍历并验证所有参考案例
-  function validateReferences(obj: any) {
-    if (!obj || typeof obj !== 'object') return;
-
-    if (Array.isArray(obj)) {
-      for (let i = 0; i < obj.length; i++) {
-        // 如果是字符串（标题），确保它是有效的
-        if (typeof obj[i] === 'string' && obj[i].length < 10) {
-          // 如果标题太短，替换为默认标题
-          obj[i] = defaultRefs[i % defaultRefs.length];
-        }
-        // 如果是旧格式的参考案例对象，转换为仅标题
-        else if (obj[i] && typeof obj[i] === 'object' && ('url' in obj[i] || 'title' in obj[i])) {
-          obj[i] = obj[i].title || defaultRefs[i % defaultRefs.length];
-        } else {
-          validateReferences(obj[i]);
-        }
-      }
+    if (error instanceof Error) {
+      throw new Error(`Invalid analysis result structure: ${error.message}`);
     } else {
-      for (const key in obj) {
-        if (key === '相关案例' || key === '参考案例') {
-          if (typeof obj[key] === 'string' && obj[key].length < 10) {
-            obj[key] = defaultRefs[0];
-          } else if (typeof obj[key] === 'object' && ('url' in obj[key] || 'title' in obj[key])) {
-            obj[key] = obj[key].title || defaultRefs[0];
-          }
-        } else {
-          validateReferences(obj[key]);
-        }
-      }
+      throw new Error('Invalid analysis result structure: Unknown error');
     }
   }
-
-  validateReferences(content);
-  return content;
 }
 
 // 添加重试工具函数
@@ -634,5 +564,22 @@ export async function POST(request: Request) {
         message: error.message || '请求处理失败'
       }
     }, { status: 500 });
+  }
+}
+
+// 验证URL是否可访问
+async function validateUrl(url: string): Promise<boolean> {
+  try {
+    const response = await axios.get(url, {
+      timeout: 5000,
+      maxRedirects: 5,
+      validateStatus: function (status) {
+        return status === 200; // 只接受200状态码
+      }
+    });
+    return true;
+  } catch (error) {
+    console.error(`URL validation failed for ${url}:`, error instanceof Error ? error.message : 'Unknown error');
+    return false;
   }
 }

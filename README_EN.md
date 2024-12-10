@@ -201,8 +201,6 @@ pnpm dev
 3. Add environment variables
 4. Deploy
 
-```
-
 ## 📱 Usage Guide
 
 1. Personal Information
@@ -244,6 +242,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Project Lead: [Taielab](https://github.com/taielab)
 - Website: [https://github.com/taielab](https://github.com/taielab)
+
+## 🔄 Latest Updates
+
+### 2024-12-10
+- Enhanced question category system with new 'expression', 'parenting', and 'goals' categories
+- Improved share page performance and loading experience
+  - Added Suspense boundary support
+  - Optimized page loading states
+- Enhanced TypeScript type definitions
+  - Extended question category type support
+  - Improved type safety
+
+### 🔧 Technical Improvements
+- **Type System Enhancement**
+  - Complete TypeScript type definitions
+  - Strict type checking
+  - Support for multi-dimensional assessment categories
+- **Performance Optimization**
+  - React Suspense integration
+  - Optimized client-side rendering
+  - Smart loading state management
 
 ---
 

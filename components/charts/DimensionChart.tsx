@@ -58,8 +58,10 @@ export function DimensionChart({ dimensions, className }: DimensionChartProps) {
         motionConfig="gentle"
         theme={{
           background: 'transparent',
-          textColor: '#4A5568',
-          fontSize: 12,
+          text: {
+            fill: '#4A5568',
+            fontSize: 12,
+          },
           grid: {
             line: {
               stroke: '#FFC0CB',
