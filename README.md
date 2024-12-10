@@ -166,13 +166,13 @@ pnpm dev
    YUNWU_MODEL=gpt-3.5-turbo
    OPENAI_MAX_TOKENS=2000
    OPENAI_TEMPERATURE=0.7
-
+   
    # 代理配置
    API_MAX_RETRIES=3
    API_INITIAL_RETRY_DELAY=3000
    API_MAX_RETRY_DELAY=15000
    API_REQUEST_TIMEOUT=30000
-
+   
    # 环境配置
    NODE_ENV=production
    ```
@@ -201,8 +201,6 @@ pnpm dev
    - 发布目录：`.next`
 3. 添加环境变量
 4. 部署
-
-```
 
 ## 📱 使用指南 | Usage Guide
 
