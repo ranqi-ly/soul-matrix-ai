@@ -6,34 +6,8 @@ import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { FaHeart, FaUserFriends, FaComments, FaRing } from 'react-icons/fa'
-import { useState, useEffect } from 'react'
 
 export default function Home() {
-  // 使用固定的网格布局作为初始位置
-  const initialPositions = Array(20).fill(0).map((_, i) => ({
-    x: (i * 100) % 1000,  // 使用固定值代替window.innerWidth
-    y: Math.floor(i / 5) * 100
-  }));
-
-  const [positions, setPositions] = useState(initialPositions);
-  
-  // 图标尺寸配置
-  const iconProps = {
-    size: 24,
-    className: "text-white/80"
-  };
-
-  useEffect(() => {
-    // 客户端加载后更新为随机位置
-    if (typeof window !== 'undefined') {
-      const newPositions = Array(20).fill(0).map(() => ({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight
-      }));
-      setPositions(newPositions);
-    }
-  }, []);
-
   return (
     <div className="space-y-32">
       {/* Hero Section */}
@@ -48,13 +22,12 @@ export default function Home() {
                 className="absolute text-white/20"
                 initial={{ 
                   scale: 0.5,
-                  x: 0,  // 从固定位置开始
-                  y: 0
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight
                 }}
                 animate={{
-                  x: positions[i]?.x || 0,  // 动画到随机位置
-                  y: positions[i]?.y || 0,
-                  scale: [0.5, 1, 0.5],
+                  y: [null, -20, 0],
+                  scale: [null, 1, 0.5],
                 }}
                 transition={{
                   duration: 4,
@@ -62,7 +35,7 @@ export default function Home() {
                   delay: i * 0.2,
                 }}
               >
-                <FaHeart {...iconProps} />
+                <FaHeart size={20 + Math.random() * 20} />
               </motion.div>
             ))}
           </div>
@@ -155,7 +128,7 @@ export default function Home() {
           >
             <Card className="p-8 hover:shadow-lg transition-all hover:-translate-y-1 border-0 bg-gradient-to-br from-purple-50 to-white">
               <div className="h-14 w-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-6">
-                <FaUserFriends {...iconProps} />
+                <FaUserFriends className="h-7 w-7" />
               </div>
               <h3 className="text-xl font-semibold mb-3">AI 智能分析</h3>
               <p className="text-gray-500 leading-relaxed">采用先进的人工智能算法，全方位分析你们的关系契合度</p>
@@ -169,7 +142,7 @@ export default function Home() {
           >
             <Card className="p-8 hover:shadow-lg transition-all hover:-translate-y-1 border-0 bg-gradient-to-br from-pink-50 to-white">
               <div className="h-14 w-14 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center mb-6">
-                <FaHeart {...iconProps} />
+                <FaHeart className="h-7 w-7" />
               </div>
               <h3 className="text-xl font-semibold mb-3">科学评估</h3>
               <p className="text-gray-500 leading-relaxed">基于心理学和数据科学的评估体系，确保分析结果的准确性</p>
@@ -183,7 +156,7 @@ export default function Home() {
           >
             <Card className="p-8 hover:shadow-lg transition-all hover:-translate-y-1 border-0 bg-gradient-to-br from-yellow-50 to-white">
               <div className="h-14 w-14 rounded-2xl bg-yellow-100 text-yellow-600 flex items-center justify-center mb-6">
-                <FaComments {...iconProps} />
+                <FaComments className="h-7 w-7" />
               </div>
               <h3 className="text-xl font-semibold mb-3">即时结果</h3>
               <p className="text-gray-500 leading-relaxed">快速获取分析报告，及时了解你们的关系状况</p>
@@ -268,25 +241,25 @@ export default function Home() {
               {
                 title: "初识阶段",
                 content: "了解彼此的基本情况，建立初步印象",
-                icon: <FaUserFriends {...iconProps} />,
+                icon: <FaUserFriends />,
                 color: "bg-purple-600"
               },
               {
                 title: "了解阶段",
                 content: "深入了解对方的性格、爱好、价值观等",
-                icon: <FaComments {...iconProps} />,
+                icon: <FaComments />,
                 color: "bg-pink-500"
               },
               {
                 title: "确认关系",
                 content: "双方确认感情，建立恋爱关系",
-                icon: <FaHeart {...iconProps} />,
+                icon: <FaHeart />,
                 color: "bg-red-500"
               },
               {
                 title: "稳定发展",
                 content: "共同成长，建立长期稳定的关系",
-                icon: <FaRing {...iconProps} />,
+                icon: <FaRing />,
                 color: "bg-yellow-500"
               }
             ].map((stage, index) => (

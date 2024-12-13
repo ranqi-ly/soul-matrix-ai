@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DualAssessmentForm } from '@/components/assessment'
+import AssessmentForm from '@/components/assessment/AssessmentForm'
 import { Card } from '@/components/ui/card'
 import { AnalysisReport } from '@/components/analysis'
 import Link from 'next/link'
@@ -39,7 +39,7 @@ export default function AssessPage() {
             <h1 className="text-4xl font-bold text-gray-900 mb-3">灵魂契合度测试</h1>
             <p className="text-gray-500">填写以下信息，获取你们的匹配分析</p>
           </div>
-          <DualAssessmentForm onComplete={setResult} />
+          <AssessmentForm onComplete={setResult} />
         </Card>
         {renderResult()}
       </div>

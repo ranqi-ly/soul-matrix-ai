@@ -3,7 +3,7 @@ import { questions } from '@/data/questions';
 import cache from 'memory-cache';
 import axios from 'axios';
 
-const CACHE_DURATION = parseInt(process.env.CACHE_DURATION || '3600000'); // 1小时缓存
+const CACHE_DURATION = 30 * 60 * 1000; // 30分钟
 
 // 计算特征得分
 function calculateTraitScores(answers: Record<string, string>) {
@@ -140,36 +140,79 @@ function validateDevelopmentAdvice(data: any) {
       };
     }
 
-    return {
-      时间范围: period.时间范围 || '',
-      重点任务: Array.isArray(period.重点任务) ? period.重点任务.map((task: any) => ({
+    // 验证并处理重点任务
+    const validateTasks = (tasks: any[]) => {
+      if (!Array.isArray(tasks)) return [];
+      return tasks.map(task => ({
         任务: task?.任务 || '',
         具体目标: task?.具体目标 || '',
         衡量标准: task?.衡量标准 || '',
         可行性: task?.可行性 || '',
         相关性: task?.相关性 || '',
         时间节点: task?.时间节点 || ''
-      })) : [],
-      潜在风险: Array.isArray(period.潜在风险) ? period.潜在风险.map((risk: any) => ({
+      })).filter(task => task.任务 || task.具体目标); // 过滤掉完全空的任务
+    };
+
+    // 验证并处理潜在风险
+    const validateRisks = (risks: any[]) => {
+      if (!Array.isArray(risks)) return [];
+      return risks.map(risk => ({
         风险: risk?.风险 || '',
         预防措施: risk?.预防措施 || '',
         应对方案: risk?.应对方案 || ''
-      })) : [],
-      参考案例: Array.isArray(period.参考案例) ? period.参考案例.map((ref: any) => ({
-        title: ref?.title || '',
-        url: ref?.url || '',
-        description: ref?.description || ''
-      })) : [],
-      成功概率: period.成功概率 || ''
+      })).filter(risk => risk.风险); // 过滤掉没有风险描述的项
     };
+
+    // 验证并处理参考案例
+    const validateReferences = (refs: any[]) => {
+      if (!Array.isArray(refs)) return [];
+      return refs.map(ref => {
+        // 如果ref是字符串，直接作为title使用
+        if (typeof ref === 'string') {
+          return {
+            title: ref,
+            description: ''
+          };
+        }
+        // 如果ref是对象，提取title和description
+        return {
+          title: ref?.title || '',
+          description: ref?.description || ''
+        };
+      }).filter(ref => ref.title); // 过滤掉没有标题的案例
+    };
+
+    try {
+      return {
+        时间范围: period.时间范围 || '',
+        重点任务: validateTasks(period.重点任务),
+        潜在风险: validateRisks(period.潜在风险),
+        参考案例: validateReferences(period.参考案例),
+        成功概率: period.成功概率 || ''
+      };
+    } catch (error) {
+      console.error('Error validating time period:', error);
+      return {
+        时间范围: period.时间范围 || '',
+        重点任务: [],
+        潜在风险: [],
+        参考案例: [],
+        成功概率: ''
+      };
+    }
   };
 
-  return {
+  const result = {
     当前阶段: data.当前阶段 || '',
     短期: validateTimePeriod(data.短期),
     中期: validateTimePeriod(data.中期),
     长期: validateTimePeriod(data.长期)
   };
+
+  // 添加日志以便调试
+  console.log('Validated development advice:', JSON.stringify(result, null, 2));
+  
+  return result;
 }
 
 // 验证具体建议数据
@@ -216,41 +259,99 @@ function validateSuggestion(data: any) {
 function validateAnalysisResult(data: any) {
   if (!data || typeof data !== 'object') {
     console.error('Invalid analysis result data structure:', data);
-    throw new Error('Invalid analysis result data');
+    throw new Error('分析结果数据结构无效');
   }
 
   // 记录原始数据结构以便调试
-  console.log('Validating analysis result with structure:', JSON.stringify({
-    hasMatchScore: '匹配度' in data,
-    hasDimensionAnalysis: '维度分析' in data,
-    hasAgeAnalysis: '年龄段分析' in data,
-    hasDevelopmentAdvice: '发展阶段建议' in data,
-    dimensionAnalysisKeys: data.维度分析 ? Object.keys(data.维度分析) : []
-  }, null, 2));
+  console.log('Raw analysis result:', JSON.stringify(data, null, 2));
 
   try {
-    // 验证并提供默认值
-    const result = {
-      匹配度: Number(data.匹配度) || 0,
-      维度分析: {
-        性格匹配度: validateDimensionAnalysis(data.维度分析?.性格匹配度),
-        沟通方式: validateDimensionAnalysis(data.维度分析?.沟通方式),
-        价值观: validateDimensionAnalysis(data.维度分析?.价值观),
-        生活方式: validateDimensionAnalysis(data.维度分析?.生活方式),
-        成长潜力: validateDimensionAnalysis(data.维度分析?.成长潜力)
-      },
-      年龄段分析: validateAgeAnalysis(data.年龄段分析 || {}),
-      发展阶段建议: validateDevelopmentAdvice(data.发展阶段建议 || {}),
+    // 验证匹配度
+    const matchScore = Number(data.匹配度);
+    if (isNaN(matchScore) || matchScore < 0 || matchScore > 100) {
+      console.error('Invalid match score:', data.匹配度);
+      throw new Error('匹配度数值无效');
+    }
+
+    // 验证维度分析
+    if (!data.维度分析 || typeof data.维度分析 !== 'object') {
+      console.error('Missing or invalid dimension analysis:', data.维度分析);
+      throw new Error('维度分析数据无效或缺失');
+    }
+
+    // 处理每个维度
+    const dimensionAnalysis: Record<string, any> = {};
+    const requiredDimensions = ['性格匹配度', '沟通方式', '价值观', '生活方式', '成长潜力'];
+    
+    for (const dimension of requiredDimensions) {
+      const value = data.维度分析[dimension];
+      if (!value || typeof value !== 'object') {
+        console.warn(`Missing or invalid dimension data for ${dimension}:`, value);
+        dimensionAnalysis[dimension] = {
+          分数: 0,
+          优势: [],
+          挑战: []
+        };
+        continue;
+      }
+
+      dimensionAnalysis[dimension] = {
+        分数: Number(value.分数) || 0,
+        优势: Array.isArray(value.优势) ? value.优势.filter(Boolean) : [],
+        挑战: Array.isArray(value.挑战) ? value.挑战.filter(Boolean) : []
+      };
+    }
+
+    // 验证年龄分析
+    if (!data.年龄段分析 || typeof data.年龄段分析 !== 'object') {
+      console.error('Missing or invalid age analysis:', data.年龄段分析);
+      throw new Error('年龄段分析数据无效或缺失');
+    }
+
+    // 处理年龄分析数据
+    const ageAnalysis = {
+      特征: data.年龄段分析.特征 || '',
+      优势: Array.isArray(data.年龄段分析.优势) ? data.年龄段分析.优势.filter(Boolean) : [],
+      挑战: Array.isArray(data.年龄段分析.挑战) ? data.年龄段分析.挑战.filter(Boolean) : [],
+      参考案例: data.年龄段分析.参考案例 || '',
+      统计数据: {
+        同龄群体婚恋特点: data.年龄段分析.统计数据?.同龄群体婚恋特点 || '',
+        成功率数据: data.年龄段分析.统计数据?.成功率数据 || '',
+        关键影响因素: Array.isArray(data.年龄段分析.统计数据?.关键影响因素) 
+          ? data.年龄段分析.统计数据.关键影响因素.filter(Boolean)
+          : []
+      }
     };
 
+    // 验证发展建议
+    if (!data.发展阶段建议 || typeof data.发展阶段建议 !== 'object') {
+      console.error('Missing or invalid development advice:', data.发展阶段建议);
+      throw new Error('发展阶段建议数据无效或缺失');
+    }
+
+    // 处理发展建议数据
+    const developmentAdvice = validateDevelopmentAdvice(data.发展阶段建议);
+
+    // 构建结果对象
+    const result = {
+      匹配度: matchScore,
+      维度分析: dimensionAnalysis,
+      年龄段分析: ageAnalysis,
+      发展阶段建议: developmentAdvice
+    };
+
+    // 添加详细的验证日志
+    console.log('Validation completed successfully');
+    console.log('Validated analysis result:', JSON.stringify(result, null, 2));
+    
     return result;
   } catch (error) {
     console.error('Error during analysis result validation:', error);
     console.error('Problematic data:', JSON.stringify(data, null, 2));
     if (error instanceof Error) {
-      throw new Error(`Invalid analysis result structure: ${error.message}`);
+      throw new Error(`分析结果结构验证失败: ${error.message}`);
     } else {
-      throw new Error('Invalid analysis result structure: Unknown error');
+      throw new Error('分析结果结构验证失败: 未知错误');
     }
   }
 }
@@ -281,63 +382,173 @@ async function retryOperation<T>(
 
 // 添加数据修复函数
 function repairJsonContent(content: string): string {
-  // 移除可能导致解析错误的字符
-  content = content.replace(/[\u0000-\u0019]+/g, " ");
-  
   try {
-    // 尝试解析，如果成功直接返回
-    JSON.parse(content);
-    return content;
-  } catch (error) {
-    // 1. 修复未闭合的数组
-    content = content.replace(/\[\s*"[^"\]]*$/, '"]');
+    // 1. 移除可能的 BOM 标记
+    content = content.replace(/^\uFEFF/, '');
     
-    // 2. 修复未闭合的对象
-    const leftBraces = (content.match(/{/g) || []).length;
-    const rightBraces = (content.match(/}/g) || []).length;
-    if (leftBraces > rightBraces) {
-      content = content.trim();
-      for (let i = 0; i < leftBraces - rightBraces; i++) {
-        content += '}';
+    // 2. 处理未闭合的引号
+    let inString = false;
+    let lastQuote = -1;
+    let escaped = false;
+    const chars = content.split('');
+    
+    for (let i = 0; i < chars.length; i++) {
+      if (chars[i] === '\\' && !escaped) {
+        escaped = true;
+        continue;
       }
-    }
-    
-    // 3. 修复未闭合的字符串
-    content = content.replace(/"([^"]*?)(?:\s*[\}\]\,]|$)/g, '"$1"$2');
-    
-    // 4. 修复常见的URL截断
-    content = content.replace(
-      /"url":\s*"https?:\/\/[^"]*?(?:\s|$)/g,
-      (match) => {
-        if (match.includes('zhihu.com')) {
-          return '"url": "https://www.zhihu.com/people/zhang-de-fen"';
-        } else if (match.includes('xinli001')) {
-          return '"url": "https://www.xinli001.com"';
-        } else if (match.includes('jiandanxinli')) {
-          return '"url": "https://space.jiandanxinli.com"';
+      
+      if (chars[i] === '"' && !escaped) {
+        if (inString) {
+          inString = false;
         } else {
-          return '"url": "https://www.douban.com/channel/30166503/"';
+          inString = true;
+          lastQuote = i;
         }
       }
-    );
+      
+      escaped = false;
+    }
+    
+    // 如果字符串未闭合，添加引号
+    if (inString) {
+      chars.splice(lastQuote + 1, 0, '"');
+      content = chars.join('');
+    }
+    
+    // 3. 确保所有属性名都有引号
+    content = content.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+    
+    // 4. 移除尾部逗号
+    content = content.replace(/,\s*([}\]])/g, '$1');
+    
+    // 5. 处理被截断的对象
+    const lastOpenBrace = content.lastIndexOf('{');
+    const lastCloseBrace = content.lastIndexOf('}');
+    
+    if (lastOpenBrace > lastCloseBrace) {
+      // 找到最后一个完整的属性
+      const validContent = content.substring(0, content.lastIndexOf(',', lastOpenBrace));
+      content = validContent;
+    }
+    
+    // 6. 确保JSON对象完整闭合
+    let openBraces = (content.match(/{/g) || []).length;
+    let closeBraces = (content.match(/}/g) || []).length;
+    
+    while (openBraces > closeBraces) {
+      content += '}';
+      closeBraces++;
+    }
+    
+    // 7. 验证修复后的内容是否可以解析
+    try {
+      JSON.parse(content);
+    } catch (parseError) {
+      // 如果仍然无法解析，尝试移除最后一个不完整的属性
+      content = content.replace(/,\s*"[^"]*"\s*:\s*[^,}]*$/, '');
+      content += '}';
+    }
     
     return content;
+  } catch (error) {
+    console.error('修复JSON内容时出错:', error);
+    throw new Error('JSON修复失败');
   }
 }
 
 // 添加验证函数
 function validateJsonStructure(data: any): boolean {
-  const requiredFields = ['匹配度', '维度分析', '年龄段分析', '发展阶段建议'];
-  return requiredFields.every(field => {
-    const hasField = field in data;
-    if (!hasField) {
-      console.error(`Missing required field: ${field}`);
+  try {
+    // 基本结构验证
+    if (!data || typeof data !== 'object') {
+      return false;
     }
-    return hasField;
-  });
+
+    // 必需字段验证
+    const requiredFields = ['匹配度', '维度分析', '年龄段分析', '发展阶段建议'];
+    for (const field of requiredFields) {
+      if (!(field in data)) {
+        console.error(`缺少必需字段: ${field}`);
+        return false;
+      }
+    }
+
+    // 匹配度验证
+    if (typeof data.匹配度 !== 'number' || data.匹配度 < 0 || data.匹配度 > 100) {
+      console.error('匹配度格式无效');
+      return false;
+    }
+
+    // 维度分析验证
+    if (typeof data.维度分析 !== 'object') {
+      console.error('维度分析格式无效');
+      return false;
+    }
+
+    // 验证每个维度的结构
+    for (const dimension of Object.values(data.维度分析)) {
+      if (!validateDimensionStructure(dimension)) {
+        return false;
+      }
+    }
+
+    // 年龄分析验证
+    if (typeof data.年龄段分析 !== 'object') {
+      console.error('年龄分析格式无效');
+      return false;
+    }
+
+    // 发展建议验证
+    if (!Array.isArray(data.发展阶段建议) && typeof data.发展阶段建议 !== 'object') {
+      console.error('发展建议格式无效');
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('验证JSON结构时出错:', error);
+    return false;
+  }
 }
 
-export async function POST(request: Request) {
+function validateDimensionStructure(dimension: any): boolean {
+  if (!dimension || typeof dimension !== 'object') {
+    return false;
+  }
+
+  const requiredFields = ['分数', '优势', '挑战'];
+  for (const field of requiredFields) {
+    if (!(field in dimension)) {
+      console.error(`维度缺少必需字段: ${field}`);
+      return false;
+    }
+  }
+
+  if (typeof dimension.分数 !== 'number' || dimension.分数 < 0 || dimension.分数 > 100) {
+    console.error('维度分数格式无效');
+    return false;
+  }
+
+  if (!Array.isArray(dimension.优势) || !Array.isArray(dimension.挑战)) {
+    console.error('优势或挑战不是数组');
+    return false;
+  }
+
+  return true;
+}
+
+// 生成唯一ID的函数
+function generateId(length: number = 20): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+export async function POST(request: NextRequest) {
   try {
     // 检查环境变量
     const apiKey = process.env.YUNWU_API_KEY;
@@ -538,23 +749,37 @@ export async function POST(request: Request) {
       console.log('Raw API response content:', content.substring(0, 200));
       
       const repairedContent = repairJsonContent(content);
-      let parsedResult = JSON.parse(repairedContent);
+      console.log('修复后的JSON内容:', repairedContent); // 添加日志
+      
+      let parsedResult;
+      try {
+        parsedResult = JSON.parse(repairedContent);
+      } catch (parseError) {
+        console.error('JSON解析失败:', parseError);
+        throw new Error('解析结果失败');
+      }
 
-      // 验证数据结构
       if (!validateJsonStructure(parsedResult)) {
-        throw new Error('数据结构验证失败');
+        throw new Error('结果数据结构无效');
       }
 
       // 验证和转换数据结构
       const analysisResult = validateAnalysisResult(parsedResult);
       
-      // 缓存结果
-      const cacheKey = JSON.stringify({ person1: person1.answers, person2: person2.answers });
-      cache.put(cacheKey, analysisResult, CACHE_DURATION);
+      // 生成唯一ID并缓存结果
+      const resultId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      
+      // 存储结果和缓存时间
+      await Promise.all([
+        cache.put(resultId, analysisResult, CACHE_DURATION),
+        cache.put(`cacheTime_${resultId}`, Date.now(), CACHE_DURATION)
+      ]);
 
       return NextResponse.json({
         success: true,
-        data: analysisResult
+        data: {
+          resultId
+        }
       });
 
     } catch (error: any) {
