@@ -83,24 +83,29 @@ Soul Matrix AI is an innovative AI-driven relationship analysis system. Utilizin
    - 导入你的 Fork 仓库
 
 2. **环境变量配置**
+
+3. 点击[注册云雾中转API](https://yunwu.ai/register?aff=PBpy)跑通项目
+
    ```env
-   # OpenAI API Configuration
-   OPENAI_API_KEY=your_api_key
-   OPENAI_MODEL=gpt-4
+   # OpenAI API 配置（使用国内中转）
+   YUNWU_API_KEY=
+   YUNWU_API_URL=https://yunwu.ai/v1/chat/completions
+   YUNWU_MODEL=gpt-3.5-turbo
    OPENAI_MAX_TOKENS=2000
    OPENAI_TEMPERATURE=0.7
-   
-   # API Configuration
+   # 代理重试配置
    API_MAX_RETRIES=3
    API_INITIAL_RETRY_DELAY=3000
    API_MAX_RETRY_DELAY=15000
+   
+   # 代理超时配置
    API_REQUEST_TIMEOUT=30000
    
-   # Environment
-   NODE_ENV=production
+   # 其他配置
+   NODE_ENV=development
    ```
 
-3. **部署**
+4. **部署**
    - 点击 "Deploy"
    - 等待构建完成
    - 访问生成的域名
