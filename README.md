@@ -272,5 +272,5 @@ Feel free to submit issues and feature requests. If you want to contribute code,
 
 ## 📧 联系我们 | Contact Us
 
-- Email: taielab@gmail.com
+- 微信公众号:泰阿安全实验室
 - GitHub: [@taielab](https://github.com/taielab)
