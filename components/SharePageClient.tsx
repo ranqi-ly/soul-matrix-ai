@@ -2,96 +2,144 @@
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
-import { AnalysisReport } from '@/components/AnalysisReport'
-import { ShareResultPanel } from '@/components/ShareResultPanel'
-import Head from 'next/head'
+import { motion } from 'framer-motion'
+import { FaHeart } from 'react-icons/fa'
 
 interface SharePageClientProps {
   id: string
 }
 
+interface ResultData {
+  person1: {
+    name: string
+    age: number
+    gender: string
+  }
+  person2: {
+    name: string
+    age: number
+    gender: string
+  }
+  matchScore: number
+  analysis: string
+  suggestions: string[]
+}
+
 export function SharePageClient({ id }: SharePageClientProps) {
-  const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const [result, setResult] = useState<ResultData | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id) {
-      setError('无效的分享链接')
-      setLoading(false)
-      return
-    }
-
-    const fetchSharedResult = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/share?id=${id}`)
-        if (!response.ok) {
-          throw new Error('获取数据失败')
-        }
-        const data = await response.json()
-        setResult(data.result)
-        setError('')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '获取数据失败')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchSharedResult()
+    fetchResult()
   }, [id])
 
-  if (!id) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold mb-4">无效的分享链接</h1>
-        <p>请检查链接是否正确</p>
-      </div>
-    )
+  const fetchResult = async () => {
+    try {
+      const response = await fetch(`/api/result?id=${id}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch result')
+      }
+      const data = await response.json()
+      setResult(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <Card className="w-full max-w-2xl p-6">
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+            </div>
+            <p className="text-center text-gray-500">加载中...</p>
+          </div>
+        </Card>
       </div>
     )
   }
 
-  if (error) {
+  if (error || !result) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <Card className="max-w-md w-full p-6 text-center">
-          <h2 className="text-xl font-bold mb-4">😢 {error}</h2>
-          <p className="text-gray-600 mb-6">
-            该分享可能已过期或不存在，建议重新生成分享链接
-          </p>
-          <Button onClick={() => router.push('/')}>返回首页</Button>
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <Card className="w-full max-w-2xl p-6">
+          <div className="space-y-4">
+            <p className="text-center text-red-500">
+              {error || '无法加载结果'}
+            </p>
+            <div className="flex justify-center">
+              <Button onClick={fetchResult}>重试</Button>
+            </div>
+          </div>
         </Card>
       </div>
     )
   }
 
   return (
-    <>
-      <Head>
-        <title>分享 - Soul Matrix AI</title>
-        <meta name="description" content="查看 AI 生成的关系分析报告" />
-      </Head>
-      <div className="min-h-screen">
-        <div className="container mx-auto py-8 px-4">
-          <Card className="max-w-4xl mx-auto p-6">
-            <div className="space-y-6">
-              <AnalysisReport result={result} />
-              <ShareResultPanel result={result} />
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-b from-pink-50 to-purple-50">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-2xl"
+      >
+        <Card className="p-6 shadow-lg">
+          <div className="space-y-6">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                匹配度分析报告
+              </h1>
+              <div className="flex justify-center items-center space-x-2 text-pink-500">
+                <span>{result.person1.name}</span>
+                <FaHeart className="animate-pulse" />
+                <span>{result.person2.name}</span>
+              </div>
             </div>
-          </Card>
-        </div>
-      </div>
-    </>
+
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-pink-500 mb-2">
+                  {result.matchScore}%
+                </div>
+                <Progress value={result.matchScore} className="h-2" />
+              </div>
+
+              <div className="space-y-4 mt-6">
+                <h2 className="text-xl font-semibold text-gray-800">详细分析</h2>
+                <p className="text-gray-600 whitespace-pre-line">
+                  {result.analysis}
+                </p>
+              </div>
+
+              <div className="space-y-4 mt-6">
+                <h2 className="text-xl font-semibold text-gray-800">建议</h2>
+                <ul className="space-y-2">
+                  {result.suggestions.map((suggestion, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-start space-x-2"
+                    >
+                      <FaHeart className="text-pink-500 mt-1 flex-shrink-0" />
+                      <span className="text-gray-600">{suggestion}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    </div>
   )
 }

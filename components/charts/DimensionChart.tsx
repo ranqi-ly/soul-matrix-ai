@@ -11,6 +11,15 @@ interface DimensionChartProps {
 }
 
 export function DimensionChart({ dimensions, className }: DimensionChartProps) {
+  // 检查 dimensions 是否为空
+  if (!dimensions) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-gray-500">
+        暂无维度数据
+      </div>
+    )
+  }
+
   // 转换数据格式为 Nivo 需要的格式
   const chartData = Object.entries(dimensions).map(([key, value]) => ({
     dimension: key,
@@ -23,7 +32,7 @@ export function DimensionChart({ dimensions, className }: DimensionChartProps) {
   if (Object.keys(dimensions).length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">
-        维度数据格式错误
+        维度数据为空
       </div>
     )
   }

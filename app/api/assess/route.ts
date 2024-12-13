@@ -513,7 +513,17 @@ export async function POST(request: Request) {
         });
 
         if (response.status !== 200) {
-          throw new Error('API请求失败');
+          const errorMessage = response.data?.error?.message || '未知错误';
+          console.error('API Error:', {
+            status: response.status,
+            data: response.data,
+            error: errorMessage
+          });
+          throw new Error(`API请求失败: ${response.status} - ${errorMessage}`);
+        }
+
+        if (!response.data) {
+          throw new Error('API响应数据为空');
         }
 
         return response;
